@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping(path = "/api")
 public class GameListController {
 
@@ -30,16 +31,16 @@ public class GameListController {
   }
 
 //  ***** GET LIST BY ID *****
-//  @GetMapping(path = "/lists/{listId}")
-//  public Optional getGameList(@PathVariable Long gameListId) throws Exception {
-//    System.out.println("Retrieving GameList ID: " + gameListId);
-//    Optional gameList = gameListRepo.findById(gameListId);
-//    if (gameList.isPresent()) {
-//      return gameList;
-//    } else {
-//      throw new InfoNotFoundException("Game List with ID: " + gameListId + " Not Located.");
-//    }
-//  }
+  @GetMapping(path = "/lists/{gameListId}")
+  public Optional getGameList(@PathVariable Long gameListId) throws Exception {
+    System.out.println("Retrieving GameList ID: " + gameListId);
+    Optional gameList = gameListRepo.findById(gameListId);
+    if (gameList.isPresent()) {
+      return gameList;
+    } else {
+      throw new InfoNotFoundException("Game List with ID: " + gameListId + " Not Located.");
+    }
+  }
 
 //  ***** CREATE NEW LIST *****
   @PostMapping(path = "/lists")
