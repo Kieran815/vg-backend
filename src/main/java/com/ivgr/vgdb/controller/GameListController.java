@@ -65,25 +65,28 @@ public class GameListController {
     return gameListService.deleteGameList(gameListId);
   }
 
+//  ***** ADD GAME TO LIST *****
   @PostMapping(path = "/lists/{gameListId}/games")
   public Game createGameListGame(@PathVariable(value = "gameListId") Long gameListId, @RequestBody Game gameObject) {
     System.out.println("Calling createGameListGame from GameListController");
     return gameListService.createGameListGame(gameListId, gameObject);
   }
 
-  @GetMapping(path = "/lists/{gameListId}/games/")
+  //  ***** GET GAMES IN LIST *****
+  @GetMapping(path = "/lists/{gameListId}/games")
   public List<Game> getGameListGames(@PathVariable(value = "gameListId") Long gameListId) {
-    System.out.println("Calling `getGameListGame` from `GameListController`");
+    System.out.println("Calling `getGameListGames` from `GameListController`");
     return gameListService.getGameListGames(gameListId);
   }
 
-  @GetMapping(path = "/lists/{gameListId}/games/{gameid}")
+  //  ***** GET GAME FROM GAME LIST *****
+  @GetMapping(path = "/lists/{gameListId}/games/{gameId}")
   public Game getGameListGame(@PathVariable(value = "gameListId") Long gameListId, @PathVariable(value = "gameId") Long gameId) {
     System.out.println(("Calling getGameListGame from GameListController"));
     return gameListService.getGameListGame(gameListId, gameId);
   }
 
-//  ********** WILL NOT BE USING **********
+//  ********** WILL NOT BE USING UPDATE GAME **********
   //  game data based on api, so will not be updating items, only deleting from game lists.
   // *** left in for navigation purposes and debugging ***
 //  @PutMapping(path = "/lists/{gameListId/games/{gameId}")
@@ -92,6 +95,7 @@ public class GameListController {
 //    return gameListService.updateGameListGame(gameListId, gameId, gameObject);
 //  }
 
+  //  ***** REMOVE GAME FROM GAME LIST *****
   @DeleteMapping(path = "/lists/{gameListId}/games/{gameId}")
   public ResponseEntity<HashMap> deleteGameListGame(
       @PathVariable(value = "gameListId") Long gameListId, @PathVariable(value = "gameId") Long gameId
