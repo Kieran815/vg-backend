@@ -18,5 +18,4 @@ public interface GameListRepository extends JpaRepository <GameList, Long> {
 
   GameList findByName(String gameListName);
 
-  GameList findByDescription(String gameListDescription);
 }

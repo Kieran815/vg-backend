@@ -1,6 +1,10 @@
 package com.ivgr.vgdb.model;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import javax.persistence.*;
+import java.util.List;
 
 @Entity // indicating that it is a JPA entity
 @Table(name = "lists")
@@ -18,6 +22,10 @@ public class GameList {
 
   @Column
   private String description;
+
+  @OneToMany(mappedBy = "gameList", orphanRemoval = true)
+  @LazyCollection(LazyCollectionOption.FALSE)
+  private List<Game> gameList;
 
   // use to create instances of `list` to be saved to the database
   public GameList(Long id, String name, String description) {
@@ -61,5 +69,13 @@ public class GameList {
         ", name='" + name + '\'' +
         ", description='" + description + '\'' +
         '}';
+  }
+
+  public List<Game> getGameList() {
+    return gameList;
+  }
+
+  public void setGameList(List<Game> gameList) {
+    this.gameList = gameList;
   }
 }
