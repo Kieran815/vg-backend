@@ -1,5 +1,6 @@
 package com.ivgr.vgdb.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
@@ -26,6 +27,11 @@ public class GameList {
   @OneToMany(mappedBy = "gameList", orphanRemoval = true)
   @LazyCollection(LazyCollectionOption.FALSE)
   private List<Game> gameList;
+
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  @JsonIgnore
+  private User user;
 
   // use to create instances of `list` to be saved to the database
   public GameList(Long id, String name, String description) {
@@ -77,5 +83,13 @@ public class GameList {
 
   public void setGameList(List<Game> gameList) {
     this.gameList = gameList;
+  }
+
+  public User getUser() {
+    return user;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
   }
 }

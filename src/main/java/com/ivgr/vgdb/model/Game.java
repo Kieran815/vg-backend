@@ -18,6 +18,11 @@ public class Game {
   @Column
   private String name;
 
+  @ManyToOne
+  @JoinColumn(name = "user_id")
+  @JsonIgnore
+  private User user;
+
   @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "list_id")
@@ -66,5 +71,13 @@ public class Game {
 
   public void setGameList(GameList gameList) {
     this.gameList = gameList;
+  }
+
+  public User getUser() {
+    return user;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
   }
 }
