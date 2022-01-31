@@ -1,11 +1,6 @@
 package com.ivgr.vgdb.controller;
-
-//import com.ivgr.vgdb.exception.InfoExistsException;
-//import com.ivgr.vgdb.exception.InfoNotFoundException;
-import com.ivgr.vgdb.exception.InfoNotFoundException;
 import com.ivgr.vgdb.model.Game;
 import com.ivgr.vgdb.model.GameList;
-//import com.ivgr.vgdb.repository.GameListRepository;
 import com.ivgr.vgdb.service.GameListService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
@@ -39,7 +33,7 @@ public class GameListController {
 
 //  ***** GET LIST BY ID *****
   @GetMapping(path = "/lists/{gameListId}")
-  public Optional getGameList(@PathVariable Long gameListId) {
+  public GameList getGameList(@PathVariable Long gameListId) {
     System.out.println("Retrieving GameList ID: " + gameListId);
     return gameListService.getGameList(gameListId);
   }
@@ -60,7 +54,7 @@ public class GameListController {
 
 //  ***** REMOVE GAME LIST *****
   @DeleteMapping(path = "/lists/{gameListId}")
-  public Optional<GameList> deleteGameList(@PathVariable(value = "gameListId") Long gameListId) {
+  public String deleteGameList(@PathVariable(value = "gameListId") Long gameListId) {
     System.out.println("Deleting Game List...");
     return gameListService.deleteGameList(gameListId);
   }
@@ -90,7 +84,7 @@ public class GameListController {
   //  game data based on api, so will not be updating items, only deleting from game lists.
   // *** left in for navigation purposes and debugging ***
 //  @PutMapping(path = "/lists/{gameListId/games/{gameId}")
-//  public Game updateGameListGame(@PathVariable(value = "gameListId") Long gameListId, @PathVariable(value = "gameid") Long gameId, @RequestBody Game gameObject) {
+//  public Game updateGameListGame(@PathVariable(value = "gameListId") Long gameListId, @PathVariable(value = "gameId") Long gameId, @RequestBody Game gameObject) {
 //    System.out.println("Calling updateGameListGame from GameListController");
 //    return gameListService.updateGameListGame(gameListId, gameId, gameObject);
 //  }

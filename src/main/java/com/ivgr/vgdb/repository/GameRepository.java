@@ -14,4 +14,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
   Game findByNameAndIdIsNot(String gameName, Long gameId);
 
   List<Game> findByGameListId(Long gameId);
+
+  Game findByUserIdAndName(Long userId, String name);
 }

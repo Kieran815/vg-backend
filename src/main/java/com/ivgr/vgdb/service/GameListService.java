@@ -6,17 +6,22 @@ import com.ivgr.vgdb.model.Game;
 import com.ivgr.vgdb.model.GameList;
 import com.ivgr.vgdb.repository.GameListRepository;
 import com.ivgr.vgdb.repository.GameRepository;
+import com.ivgr.vgdb.security.MyUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.logging.Logger;
 
 @Service
 public class GameListService {
+
   private GameListRepository gameListRepository;
   private GameRepository gameRepository;
+
+  private static final Logger LOGGER = Logger.getLogger(UserService.class.getName());
 
   @Autowired
   public void setGameListRepository(GameListRepository gameListRepository) {
@@ -29,97 +34,107 @@ public class GameListService {
   }
 
   public List<GameList> getGameLists() {
-    System.out.println("GameListService Calling GameLists");
-    return gameListRepository.findAll();
+    LOGGER.info("GameListService Calling GameLists...");
+    MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    System.out.println("USER DETAILS" + userDetails);
+    System.out.println(userDetails.getUser().getId());
+    List<GameList> gameList = gameListRepository.findByUserId(userDetails.getUser().getId());
+    if (gameList.isEmpty()) {
+      throw new InfoNotFoundException("No Game Lists Associated with User ID: " + userDetails.getUser().getId() + ".");
+    } else {
+      return gameList;
+    }
   }
 
-  public Optional getGameList(Long gameListId) {
-    System.out.println(("GameList Service calling Game List..."));
-    Optional gameList = gameListRepository.findById(gameListId);
-    if (gameList.isPresent()) {
-      return gameList;
+  public GameList getGameList(Long gameListId) {
+    LOGGER.info("GameList Service calling Game List...");
+    MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    GameList gameList = gameListRepository.findByIdAndUserId(gameListId, userDetails.getUser().getId());
+    if (gameList == null) {
+      throw new InfoNotFoundException("GameList ID: " + gameListId + " Not Found.");
     } else {
-      throw new InfoNotFoundException("Game List ID: " + gameListId + " not found.");
+      return gameList;
     }
   }
 
   public GameList createGameList(GameList gameListObject) {
-    System.out.println("service calling createCategory ==>");
-    GameList gameList = gameListRepository.findByName(gameListObject.getName());
+    LOGGER.info("Service Creating Game List...");
+    MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    GameList gameList = gameListRepository.findByUserIdAndName(userDetails.getUser().getId(), gameListObject.getName());
     if (gameList != null) {
       throw new InfoExistsException("gameList with name " + gameList.getName() + " already exists");
     } else {
+      gameListObject.setUser(userDetails.getUser());
       return gameListRepository.save(gameListObject);
     }
   }
 
   public GameList updateGameList(Long gameListId, GameList gameListObject) {
-    System.out.println("Game Service calling updateGameList");
-    Optional<GameList> gameList = gameListRepository.findById(gameListId);
-    if (gameList.isPresent()) {
-      if (gameListObject.getName().equals(gameList.get().getName())) {
-        System.out.println("List Not Updated, Same Name.");
-        throw new InfoExistsException("GameList Name: " + gameList.get().getName() + " Already in Use.");
-      } else {
-        GameList updateGameList = gameListRepository.findById(gameListId).get();
-        updateGameList.setName(gameListObject.getName());
-        updateGameList.setDescription((gameListObject.getDescription()));
-        return gameListRepository.save(updateGameList);
-      }
-    } else {
+    LOGGER.info("Game Service calling updateGameList");
+    MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    GameList gameList = gameListRepository.findByIdAndUserId(gameListId, userDetails.getUser().getId());
+    if (gameList == null) {
       throw new InfoNotFoundException("Game List ID: " + gameListId + " Not Found.");
+    } else {
+      gameList.setName(gameListObject.getName());
+      gameList.setDescription((gameListObject.getDescription()));
+      gameList.setUser(userDetails.getUser());
+      return gameListRepository.save(gameList);
     }
   }
 
-  public Optional<GameList> deleteGameList(Long gameListId) {
-    System.out.println("Service Deleting Game List...");
-    Optional<GameList> gameList = gameListRepository.findById(gameListId);
-    if (gameList.isPresent()) {
-      gameListRepository.deleteById(gameListId);
-      return gameList;
-    } else {
+  public String deleteGameList(Long gameListId) {
+    LOGGER.info("Service Deleting Game List...");
+    MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    GameList gameList = gameListRepository.findByIdAndUserId(gameListId, userDetails.getUser().getId());
+    if (gameList == null) {
       throw new InfoNotFoundException("Game List ID: " + gameListId + " Not Found.");
+    } else {
+      gameListRepository.deleteById(gameListId);
+      return "GameList ID: " + gameListId + " Successfully Deleted";
     }
   }
   
 //  *************************************************************************************************************
 
   public Game createGameListGame(Long gameListId, Game gameObject) {
-    System.out.println(("GameListService adding game to List: " + gameListId));
-    try {
-      Optional gameList = gameListRepository.findById(gameListId);
-      gameObject.setGameList((GameList) gameList.get());
-      return gameRepository.save(gameObject);
-    } catch (NoSuchElementException e) {
-      throw new InfoNotFoundException("GameList ID: " + gameListId + " Not Found.");
+    LOGGER.info(("GameListService adding game to List: " + gameListId));
+    MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    GameList gameList = gameListRepository.findByIdAndUserId(gameListId, userDetails.getUser().getId());
+    if (gameList == null) {
+      throw new InfoNotFoundException("GameList ID: " + gameList.getId() + " Not Found");
     }
+    Game game = gameRepository.findByUserIdAndName( userDetails.getUser().getId(), gameObject.getName());
+    if (game != null) {
+      throw new InfoExistsException("Game: " + gameObject.getName() + " is Already On this List.");
+    }
+    gameObject.setUser(userDetails.getUser());
+    gameObject.setGameList(gameList);
+    return gameRepository.save(gameObject);
   }
 
   public List<Game> getGameListGames(Long gameListId) {
-    System.out.println("Calling getGameListGames from GameListServices...");
-    Optional<GameList> gameList = gameListRepository.findById(gameListId);
-    if (gameList.isPresent()) {
-      return gameList.get().getGameList();
-    } else {
+    LOGGER.info("Calling getGameListGames from GameListServices...");
+    MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    GameList gameList = gameListRepository.findByIdAndUserId(gameListId, userDetails.getUser().getId());
+    if (gameList == null) {
       throw new InfoNotFoundException("GameList ID: " + gameListId + " Not Found.");
     }
+    return gameList.getGameList();
   }
 
   public Game getGameListGame(Long gameListId, Long gameId) {
-    System.out.println("GameListService calling getGameListGame...");
-    Optional<GameList> gameList = gameListRepository.findById(gameListId);
-    if (gameList.isPresent()) {
-      Optional<Game> game = gameRepository.findByGameListId(gameListId).stream().filter(
-          gameListItem -> gameListItem.getId().equals(gameId)
-      ).findFirst();
-      if(game.isEmpty()) {
-        throw new InfoNotFoundException("Game ID: " + gameId + " Not Found.");
-      } else {
-        return game.get();
-      }
-    } else {
+    LOGGER.info("GameListService calling getGameListGame...");
+    MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    GameList gameList = gameListRepository.findByIdAndUserId(gameListId, userDetails.getUser().getId());
+    if (gameList == null) {
       throw new InfoNotFoundException("GameList ID: " + gameListId + " Not Found");
     }
+    Optional<Game> game = gameRepository.findByGameListId(gameListId).stream().filter(gameItem -> gameItem.getId().equals(gameId)).findFirst();
+    if (!game.isPresent()) {
+      throw new InfoNotFoundException("Game ID: " + gameId + " Not Found.");
+    }
+    return game.get();
   }
 
 //  ********** WILL NOT BE USING **********
@@ -136,11 +151,16 @@ public class GameListService {
 //  }
 
   public void deleteGameListGame(Long gameListId, Long gameId) {
-    try {
-      Game game = (gameRepository.findByGameListId(gameListId).stream().filter(gameListItem -> gameListItem.getId().equals(gameId)).findFirst()).get();
-      gameRepository.deleteById(game.getId());
-    } catch (NoSuchElementException e) {
-      throw new InfoNotFoundException("Game or GameList Not Found");
+    LOGGER.info("Deleting Game from GameList ID: " + gameListId + "...");
+    MyUserDetails userDetails = (MyUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    GameList gameList = gameListRepository.findByIdAndUserId(gameListId, userDetails.getUser().getId());
+    if (gameList == null) {
+      throw new InfoNotFoundException("Game List ID: " + gameListId + " Not Found.");
     }
+    Optional<Game> game = gameRepository.findByGameListId(gameListId).stream().filter(gameItem -> gameItem.getId().equals(gameId)).findFirst();
+    if (!game.isPresent()) {
+      throw new InfoNotFoundException("Game ID: " + gameId + " Not Found");
+    }
+    gameRepository.deleteById(game.get().getId());
   }
 }

@@ -3,6 +3,8 @@ package com.ivgr.vgdb.repository;
 import com.ivgr.vgdb.model.GameList;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 
 // The type of entity and ID that it works with, Category and Long, are specified in the generic parameters on
 // JpaRepository. By extending JpaRepository, CategoryRepository inherits several methods for saving, deleting,
@@ -16,6 +18,14 @@ public interface GameListRepository extends JpaRepository <GameList, Long> {
 // However, it is no longer required with Spring Data JPA. It will create the repository implementation automatically,
 // at runtime, from the repository interface. That is what makes Spring Data JPA so much powerful.
 
+  List<GameList> findByUserId(Long userId);
+
   GameList findByName(String gameListName);
+
+  GameList findByUserIdAndName(Long userId, String name);
+
+  GameList findByIdAndUserId(Long listId, Long userId);
+
+
 
 }

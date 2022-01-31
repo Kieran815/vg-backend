@@ -26,6 +26,9 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
     this.myUserDetailsService = myUserDetailsService;
   }
 
+  @Autowired
+  private JwtRequestFilter jwtRequestFilter;
+
   // step1
 
   /**
@@ -46,6 +49,7 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
         .and().sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and().csrf().disable();
+    http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
   }
 
   @Override
