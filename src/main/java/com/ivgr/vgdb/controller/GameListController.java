@@ -25,6 +25,7 @@ public class GameListController {
   }
 
 //  ***** GET ALL LISTS *****
+  @CrossOrigin(origins = "http://localhost:4200")
   @GetMapping(path = "/lists")
   public List<GameList> getGameLists() {
     System.out.println("Retrieving Game Lists...");
@@ -99,7 +100,6 @@ public class GameListController {
     HashMap responseMessage = new HashMap();
     responseMessage.put("status", "Game with ID: " + gameId + " was successfully deleted.");
     return new ResponseEntity<HashMap>(responseMessage, HttpStatus.OK);
-
   }
 
 }
