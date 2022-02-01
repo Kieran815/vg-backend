@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin
 @RequestMapping(path = "/api")
 public class GameListController {
 
@@ -25,7 +25,6 @@ public class GameListController {
   }
 
 //  ***** GET ALL LISTS *****
-  @CrossOrigin(origins = "http://localhost:4200")
   @GetMapping(path = "/lists")
   public List<GameList> getGameLists() {
     System.out.println("Retrieving Game Lists...");
