@@ -5,6 +5,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity // indicating that it is a JPA entity
@@ -25,6 +26,7 @@ public class GameList {
   private String description;
 
   @OneToMany(mappedBy = "gameList", orphanRemoval = true)
+  @Column
   @LazyCollection(LazyCollectionOption.FALSE)
   private List<Game> gameList;
 
@@ -38,6 +40,7 @@ public class GameList {
     this.id = id;
     this.name = name;
     this.description = description;
+    this.gameList = new ArrayList<>();
   }
 
   // The no-argument `GameList` constructor is only required for JPA
